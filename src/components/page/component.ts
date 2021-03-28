@@ -19,9 +19,11 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     parent.insertAdjacentElement(position,this.element);
   }
   removeFrom(parent: HTMLElement) {
-    if(parent !== this.element.parentElement) { //부모가 맞다면 remove
+    if(parent !== this.element.parentElement) { //부모가 맞다면 remove해주기.
       throw new Error('parent mismatch');
     }
     parent.removeChild(this.element); //자신 제거
   }
+
+
 }
