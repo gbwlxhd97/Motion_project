@@ -15,7 +15,7 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     this.element = template.content.firstElementChild! as T;
   }
 
-  attachTo(parent: HTMLElement, position: InsertPosition = 'afterbegin' ) {
+  attachTo(parent: HTMLElement, position: InsertPosition = 'afterbegin' ) { //랜더링시켜주기
     parent.insertAdjacentElement(position,this.element);
   }
   removeFrom(parent: HTMLElement) {

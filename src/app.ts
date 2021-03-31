@@ -2,44 +2,54 @@ import { Component } from './components/page/component.js';
 import { TodoComponent } from './components/page/item/todo.js';
 import { NoteComponent } from './components/page/item/note.js';
 import { ImageComponent } from './components/page/item/image.js';
-import { VideoCompoent } from './components/page/item/video.js';
+import { VideoComponent } from './components/page/item/video.js';
 import { Composable, PageComponent,PageItemComponent } from "./components/page/page.js";
-import { InputDialog } from './components/dialog/dialog.js';
+import { InputDialog, MediaData, TextData } from './components/dialog/dialog.js';
+import { MediaSectionInput } from './components/dialog/input/media-input.js';
+import { TextSectionInput } from './components/dialog/input/text-input.js';
+
+type InputComponentConstructor<T = (MediaData | TextData) & Component> = {
+  new (): T;
+}
 
 class App {
   private readonly page: Component & Composable;
   
-  constructor(appRoot: HTMLElement) {
+  constructor(appRoot: HTMLElement, private dialogRoot: HTMLElement) {
     this.page = new PageComponent(PageItemComponent);
     this.page.attachTo(appRoot);
 
-    const image = new ImageComponent('Image Title', 'https://picsum.photos/600/300');
-    this.page.addChild(image);
 
-    const video = new VideoCompoent('Video Title','https://www.youtube.com/embed/Nb5u2vcVxVs?start=12');
-    this.page.addChild(video);
+    this.bindElementToDialog<MediaSectionInput>('#new-image',MediaSectionInput,(input: MediaSectionInput) => new ImageComponent(input.title,input.url));
+    this.bindElementToDialog<MediaSectionInput>('#new-video',MediaSectionInput,(input: MediaSectionInput) => new VideoComponent(input.title,input.url));
+    this.bindElementToDialog<TextSectionInput>('#new-note',TextSectionInput,(input: TextSectionInput) => new NoteComponent(input.title,input.body));
+    this.bindElementToDialog<TextSectionInput>('#new-todo',TextSectionInput,(input: TextSectionInput) => new TodoComponent(input.title,input.body));
 
-    const note = new NoteComponent('Note Title', 'Note boty');
-    this.page.addChild(note);
+    
+  }
 
-    const todo = new TodoComponent('Todo Title', 'Todo item');
-    this.page.addChild(todo);
-
-    const imageBtn = document.querySelector('#new-image')! as HTMLButtonElement;
-    imageBtn.addEventListener('click', () => {
+  private bindElementToDialog<T extends (MediaData | TextData) & Component>  //app에서만 쓰이기 때문에 private 
+  (selector: string,
+  InputComponent: InputComponentConstructor<T>,
+  makeSection: (input: T) => Component
+  ) { 
+    const element = document.querySelector(selector)! as HTMLButtonElement; //무슨버튼인지 모르기때문에 elememnt해줌
+    element.addEventListener('click', () => {
       const dialog = new InputDialog();
+      const input = new InputComponent();
+      dialog.addChild(input); //dialog에 인풋추가
+      dialog.attachTo(this.dialogRoot);
 
       dialog.setOncloseListener(() => {
-        dialog.removeFrom(document.body);
+        dialog.removeFrom(this.dialogRoot);
       });
-      dialog.setOnsubmitListener(() => {
-        //섹션을 만들어서 페이지에 추가
-        dialog.removeFrom(document.body);
+      dialog.setOnsubmitListener(() => { 
+        const image = makeSection(input);
+        this.page.addChild(image);
+        dialog.removeFrom(this.dialogRoot);
       });
-
-      dialog.attachTo(document.body);
-    })
+    });
   }
 }
 
-new App(document.querySelector('.document')! as HTMLElement)
+new App(document.querySelector('.document')! as HTMLElement, document.body);
