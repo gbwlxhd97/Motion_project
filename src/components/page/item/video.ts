@@ -7,7 +7,7 @@ export class VideoComponent extends BaseComponent<HTMLElement>{
     <div class="video__holder">
       <iframe class="video__thumbnail"></iframe>
     </div>
-    <p class="video__title"></p>
+    <h3 class="page-item__title video__title"></3>
   </section>`);
 
   const videoElement = this.element.querySelector('.video__thumbnail')! as HTMLIFrameElement;
