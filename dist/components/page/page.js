@@ -17,12 +17,27 @@ export class PageItemComponent extends BaseComponent {
         this.element.addEventListener('dragend', (event) => {
             this.onDragEnd(event);
         });
+        this.element.addEventListener('dragenter', (event) => {
+            this.onDragEnter(event);
+        });
+        this.element.addEventListener('dragleave', (event) => {
+            this.onDragLeave(event);
+        });
     }
-    onDragStart(event) {
-        console.log('dragstrat', event);
+    onDragStart(_) {
+        this.notifyDragObservers('start');
     }
-    onDragEnd(event) {
-        console.log('dragend', event);
+    onDragEnd(_) {
+        this.notifyDragObservers('stop');
+    }
+    onDragEnter(_) {
+        this.notifyDragObservers('enter');
+    }
+    onDragLeave(_) {
+        this.notifyDragObservers('leave');
+    }
+    notifyDragObservers(state) {
+        this.dragStateListener && this.dragStateListener(this, state);
     }
     addChild(child) {
         const container = this.element.querySelector('.page-item__body');
@@ -30,6 +45,9 @@ export class PageItemComponent extends BaseComponent {
     }
     setOnCloseListener(listener) {
         this.closeListener = listener;
+    }
+    setOnDragStateListener(listener) {
+        this.dragStateListener = listener;
     }
 }
 export class PageComponent extends BaseComponent {
@@ -39,18 +57,18 @@ export class PageComponent extends BaseComponent {
         this.element.addEventListener('dragover', (event) => {
             this.onDragOver(event);
         });
-        this.element.addEventListener('drop', (event) => {
-            this.onDrop(event);
+        this.element.addEventListener('dragend', (event) => {
+            this.onDragEnd(event);
         });
     }
     onDragOver(event) {
         event.preventDefault();
-        console.log('onDrop');
+        console.log('onDragOver');
     }
     ;
-    onDrop(event) {
+    onDragEnd(event) {
         event.preventDefault();
-        console.log('onDrop');
+        console.log('onDragEnd');
     }
     ;
     addChild(section) {
@@ -59,6 +77,9 @@ export class PageComponent extends BaseComponent {
         item.attachTo(this.element, 'beforeend');
         item.setOnCloseListener(() => {
             item.removeFrom(this.element);
+        });
+        item.setOnDragStateListener((target, state) => {
+            console.log(target, state);
         });
     }
 }
